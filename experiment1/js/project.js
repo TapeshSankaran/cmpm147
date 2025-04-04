@@ -13,9 +13,9 @@ const fillers = {
 };
 
 const template = `Hello $hero,
-I am the last of the $pre of $post, sworn to $help the $place from the $baddies. 
+I am the last of the $pre of $post, sworn to $help the $place from the $baddies.\n
 But I have grown weak and seek a $hero to inherit my $looty $loots. My $loots are $powery $powers.
-
+\n\n
 Do you accept?
 `;
 
