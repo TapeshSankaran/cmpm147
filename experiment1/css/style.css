@@ -11,16 +11,28 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: rgb(42, 42, 42);
 }
 
-h2 {
+h2,h1 {
 
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
+    color: white;
 }
 
-#box p {
-    font: normal 12px Verdana, Geneva, Tahoma, sans-serif;
+#box,p {
+    font: normal 13px Verdana, Geneva, Tahoma, sans-serif;
+    color: rgb(169, 169, 169)
+}
+
+.minor-section {
+    background-color: rgb(22, 22, 22);
+    margin-bottom: 20px;
+}
+
+#content {
+    background-color: #1f1f1f;
 }
 
 #canvas-container {
