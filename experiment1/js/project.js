@@ -14,13 +14,12 @@ const fillers = {
            "Subatomic Manipulation", "Chronoception", "Bio-mimicry", "Tactile Teleportation", "Psychic Fabrication", "Dreamwalking", "Biokinesis", "Voidwalking", "Transmutation", "Memory Manipulation", "Precognition", "Soundscaping", "Aura Reading","Shadowmancy", "Quantum Tunneling", "Dreamweaving", "Linguistic Enchantment", "Lightbending", "Molecular Densification"]
 };
 
-const template = `Hello $hero,
-I am the last of the $pre of $post, sworn to $help the $place from the $baddies.\n 
+const template = `Hello $hero,\n
+I am the last of the $pre of $post, sworn to $help the $place from the $baddies.\n
 But I have grown weak and seek a $hero2 to inherit my $looty $loots. My $loots2 is $powery $powers.\n\n
 
 Do you accept?
 `;
-
 
 // STUDENTS: You don't need to edit code below this line.
 
