@@ -9,14 +9,14 @@ h1, h2 {
   width: calc(100% - 30px);
   margin: 10px; /*080;*/
   padding: 10px;
-  border: solid 1px #808;
+  border: solid 2px #808;
   font-family: sans-serif;
 }
 
 .minor-section {
   margin: 10px;
-  padding: 10px;
-  border: solid 1px #A0A0A0;
+  padding: 20px;
+  border: solid 2px #b4a17f;
   border-radius: 10px;
 }
 
