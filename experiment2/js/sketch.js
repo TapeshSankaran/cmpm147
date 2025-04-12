@@ -233,7 +233,7 @@ function draw() {
   beginShape();
   vertex(width / 5, height * 0.6);
   for (let i = 1; i < waterFoam.length; i++) {
-    vertex(waterFoam[i][0] - 3, waterFoam[i][1] / 1.5 + 50);
+    vertex(waterFoam[i][0] - 3, waterFoam[i][1]/1.5 + height*0.25);
   }
   vertex((width * 2.5) / 3, height * 0.6);
   endShape(CLOSE);
@@ -338,46 +338,49 @@ function draw() {
   for (let i = 0; i < leftRock.length; i++) {
     if (random() < 0.4) {
       let y = random() * 5;
-      let x = leftRock[i][0] - 2 * random();
+      let x = leftRock[i][0] - 5 * random();
       let z = x + 10 + 14 * (random() * random() * scrub);
-      let yTop = leftRock[i][1] - 50 + 20 * random();
+      let yTop = leftRock[i][1] - 100 + 50 * random();
       quad(
         leftRock[i][0],
         leftRock[i][1] + 5 + y,
         x,
         leftRock[i][1] + y,
-        z - 5,
+        z - 10,
         yTop,
         z,
         yTop + 5 * random()
       );
+      let k = random()+0.5;
       fill(grassColor1);
-      quad(z - 2, yTop, z + 20, yTop + 5, z - 2, yTop + 5, z - 20, yTop);
-      quad(z - 2, yTop, z + 20, yTop - 5, z - 2, yTop + 5, z - 20, yTop + 5);
-      quad(z - 2, yTop, z + 15, yTop + 10, z - 2, yTop + 5, z - 15, yTop - 10);
+      quad(z - 2, yTop, z + 50*k, yTop + 15*k, z - 5, yTop + 10*k, z - 50*k, yTop);
+      quad(z - 2, yTop, z + 50*k, yTop - 15*k, z - 5, yTop + 10*k, z - 50*k, yTop + 15*k);
+      quad(z - 2, yTop, z + 40*k, yTop + 25*k, z - 5, yTop + 10*k, z - 40*k, yTop - 20*k);
       fill(rockColor1);
     }
   }
 
   for (let i = 0; i < rightRock.length; i++) {
     if (random() < 0.4) {
+      let y = random() * 5;
       let x = rightRock[i][0] + 2 * random();
       let z = x - 10 + 14 * (random() * random() * scrub);
-      let yTop = rightRock[i][1] - 50 + 20 * random();
+      let yTop = rightRock[i][1] - 100 + 50 * random();
       quad(
         rightRock[i][0],
-        rightRock[i][1] + 5,
+        rightRock[i][1] + 5 + y,
         x,
-        rightRock[i][1],
+        rightRock[i][1] + y,
         z,
         yTop,
-        z - 5,
+        z - 10,
         yTop + 5 * random()
       );
+      let k = random()+0.5;
       fill(grassColor1);
-      quad(z - 2, yTop, z - 20, yTop + 5, z - 2, yTop + 5, z + 20, yTop);
-      quad(z - 2, yTop, z - 20, yTop - 5, z - 2, yTop + 5, z + 20, yTop + 5);
-      quad(z - 2, yTop, z - 15, yTop + 10, z - 2, yTop + 5, z + 15, yTop - 10);
+      quad(z - 2, yTop, z - 50*k, yTop + 15*k, z - 5, yTop + 10*k, z + 50*k, yTop);
+      quad(z - 2, yTop, z - 50*k, yTop - 15*k, z - 5, yTop + 10*k, z + 50*k, yTop + 15*k);
+      quad(z - 2, yTop, z - 40*k, yTop + 25*k, z - 5, yTop + 10*k, z + 40*k, yTop - 20*k);
       fill(rockColor1);
     }
   }
@@ -410,4 +413,4 @@ function setup() {
 
 $("#reimagine").click(draw);
 
-draw();
+//draw();
