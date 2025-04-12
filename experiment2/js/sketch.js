@@ -208,7 +208,7 @@ function draw() {
         5 * sin((2 * PI * millis()) / 10000.0)) /
         8 +
       height / 50;
-    vertex(x, y + (30 * (1 - sin(2 * PI * millis()))) / 10000.0);
+    vertex(x, y + (height* 0.1 * (1 - sin(2 * PI * millis()))) / 10000.0);
     prevY = y;
     waterFoam.push([x, y]);
   }
@@ -216,12 +216,12 @@ function draw() {
     let x =
       width * 0.4 +
       (((width * 0.8) / 2) * i) / (steps * 1.5) +
-      10 * (1 + sin((2 * PI * millis()) / 10000.0));
+      width*0.01 * (1 + sin((2 * PI * millis()) / 10000.0));
     let y = prevY - (random() * random() * random() * height) / 8 - height / 50;
     if (y < height * 0.55) {
       break;
     }
-    vertex(x + (30 * (1 - sin(2 * PI * millis()))) / 10000.0, y);
+    vertex(x + (width* 0.2 * (1 - sin(2 * PI * millis()))) / 10000.0, y);
     prevY = y;
     waterFoam.push([x, y]);
   }
@@ -235,7 +235,7 @@ function draw() {
   for (let i = 1; i < waterFoam.length; i++) {
     vertex(waterFoam[i][0] - 3, waterFoam[i][1]/1.5 + height*0.25);
   }
-  vertex((width * 2.5) / 3, height * 0.6);
+  vertex(width, height * 0.6);
   endShape(CLOSE);
 
   rect(0, height * 0.55, width, height / 12);
@@ -411,6 +411,10 @@ function setup() {
   resizeScreen();
 }
 
-$("#reimagine").click(draw);
+$("#reimagine").click(function() {
+
+  seed++
+  draw()
+});
 
 //draw();
