@@ -32,6 +32,7 @@ let seed = 0;
 const cloudColor1 = "#CE6A87";
 const cloudColor2 = "#5F5188";
 const cloudColor3 = "#573B67";
+const cloudColor4 = "#3C2847";
 const skyColor = "#B5BCF0";
 const sunColor = "#FFFC86";
 const rockColor1 = "#080607";
@@ -156,18 +157,35 @@ function draw() {
     }
   }
 
+  let hillTop = [];
+
   fill(cloudColor3);
   beginShape();
   vertex(0, (height * 1.1) / 2);
   for (let i = 0; i < steps + 1; i++) {
-    let x = (((width * 0.8) / 2) * i) / steps;
+    let x = (((width * 0.8) / 2) * i) / (steps);
     let y =
       (height * 1.1) / 2 -
       (random() * random() * random() * height) / 3 -
       height / 50;
     vertex(x, y);
+    hillTop.push([x, y]);
   }
   vertex(width / 2, (height * 1.1) / 2);
+  hillTop.push([width / 2, (height * 1.1) / 2])
+  endShape(CLOSE);
+
+  fill(cloudColor4);
+  beginShape();
+  vertex(0, (height * 1.1) / 2);
+  for (let i = 0; i < steps*10 + 1; i++) {
+    let x = (((width * 0.8) / 2) * i) / (steps*10);
+    let k = x - hillTop[Math.floor(i/10)][0];
+    let m = (hillTop[Math.ceil(i/10)][1] - hillTop[Math.floor(i/10)][1])/(hillTop[Math.ceil(i/10)][0] - hillTop[Math.floor(i/10)][0]);
+    let y = m*k + hillTop[Math.floor(i/10)][1];
+    vertex(x, y+10*(1-sin(k*PI)));
+  }
+  vertex(width/2, (height * 1.1) / 2);
   endShape(CLOSE);
 
   fill(sandColor1);
@@ -207,7 +225,7 @@ function draw() {
       (random() * random() * random() * height +
         5 * sin((2 * PI * millis()) / 10000.0)) /
         8 +
-      height / 50;
+      height / 100;
     vertex(x, y + (height* 0.1 * (1 - sin(2 * PI * millis()))) / 10000.0);
     prevY = y;
     waterFoam.push([x, y]);
@@ -339,7 +357,7 @@ function draw() {
     if (random() < 0.4) {
       let y = random() * 5;
       let x = leftRock[i][0] - 5 * random();
-      let z = x + 10 + 14 * (random() * random() * scrub);
+      let z = x + 5 + 18 * (random() * scrub);
       let yTop = leftRock[i][1] - 100 + 50 * random();
       quad(
         leftRock[i][0],
@@ -364,7 +382,7 @@ function draw() {
     if (random() < 0.4) {
       let y = random() * 5;
       let x = rightRock[i][0] + 2 * random();
-      let z = x - 10 + 14 * (random() * random() * scrub);
+      let z = x - 5 + 18 * (random() * scrub);
       let yTop = rightRock[i][1] - 100 + 50 * random();
       quad(
         rightRock[i][0],
