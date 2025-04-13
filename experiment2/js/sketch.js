@@ -225,7 +225,7 @@ function draw() {
       (random() * random() * random() * height +
         5 * sin((2 * PI * millis()) / 10000.0)) /
         8 +
-      height / 100;
+      height / 45;
     vertex(x, y + (height* 0.1 * (1 - sin(2 * PI * millis()))) / 10000.0);
     prevY = y;
     waterFoam.push([x, y]);
