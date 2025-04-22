@@ -85,10 +85,10 @@ function placeTile2(i, j, ti, tj) {
 /* global placeTile */
 
 const lookup = [
-  [0, 13], [10, 0], [10, 2], [10, 0],
+  [0, 13], [10, 0], [10, 2], [10, 0, 10, 2],
   [11, 1], [11, 0], [11, 2], [11, 0],
   [9, 1], [9, 0], [9, 2], [9, 0],
-  [11, 1], [10, 0], [10, 2], [10, 0]
+  [11, 1, 9, 1], [10, 0, 9, 1, 11, 1], [11, 1, 9, 1, 10, 2], [10, 0, 10, 2]
 ];
 
 const lookup2 = [
@@ -207,18 +207,22 @@ function gridCode(grid, i, j, target) {
 
 function drawContext(grid, i, j, target, ti, tj, look, second) {
   const code = gridCode(grid, i, j, target);
-  const [tiOffset, tjOffset] = look[code];
+  //const [tiOffset, tjOffset] = look[code];
   if (second) {
     if (code == 0) {
-      placeTile2(i, j, ti + ((millis()/5000 + random(4))|0)%4, tj + tjOffset)
+      placeTile2(i, j, ti + ((millis()/5000 + random(4))|0)%4, tj + look[code][1])
     } else {
-      placeTile2(i, j, ti + tiOffset, tj + tjOffset);
+      for (let k=0; k<look[code].length; k+=2) {
+        placeTile2(i, j, ti + look[code][k], tj + look[code][k+1]);
+      }
     }
   } else {
     if (code == 0) {
-      placeTile(i, j, ti + ((millis()/2000 + random(4))|0)%4, tj + tjOffset)
+      placeTile(i, j, ti + ((millis()/2000 + random(4))|0)%4, tj + look[code][1])
     } else {
-      placeTile(i, j, ti + tiOffset, tj + tjOffset);
+      for (let k=0; k<look[code].length; k+=2) {
+        placeTile(i, j, ti + look[code][k], tj + look[code][k+1]);
+      }
     }
     
   }
