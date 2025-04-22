@@ -85,7 +85,7 @@ function placeTile2(i, j, ti, tj) {
 /* global placeTile */
 
 const lookup = [
-  [0, -1], [10, 0], [10, 2], [10, 0],
+  [0, 13], [10, 0], [10, 2], [10, 0],
   [11, 1], [11, 0], [11, 2], [11, 0],
   [9, 1], [9, 0], [9, 2], [9, 0],
   [11, 1], [10, 0], [10, 2], [10, 0]
@@ -143,7 +143,7 @@ function drawGrid(grid) {
   for(let i = 0; i < grid.length; i++) {
     for(let j = 0; j < grid[i].length; j++) {
       if (gridCheck(grid, i, j, '_')) {
-        placeTile(i, j, random(4) | 0, 0);
+        placeTile(i, j, random(4)|0, 0);
         if (random() < 0.01) {
           placeTile(i, j, 26, random(4)|0);
         } else if (random() < 0.05) {
@@ -174,7 +174,7 @@ function drawGrid2(grid) {
       if (gridCheck(grid, i, j, '_')) {
         placeTile2(i, j, random(4) | 0, 3);
       } else {
-        drawContext(grid, i, j, '_', random(4) | 0, 14, lookup2, true);
+        drawContext(grid, i, j, '_', 0, 14, lookup2, true);
       }
     }
 
@@ -209,9 +209,18 @@ function drawContext(grid, i, j, target, ti, tj, look, second) {
   const code = gridCode(grid, i, j, target);
   const [tiOffset, tjOffset] = look[code];
   if (second) {
-    placeTile2(i, j, ti + tiOffset, tj + tjOffset);
+    if (code == 0) {
+      placeTile2(i, j, ti + ((millis()/5000 + random(4))|0)%4, tj + tjOffset)
+    } else {
+      placeTile2(i, j, ti + tiOffset, tj + tjOffset);
+    }
   } else {
-    placeTile(i, j, ti + tiOffset, tj + tjOffset);
+    if (code == 0) {
+      placeTile(i, j, ti + ((millis()/2000 + random(4))|0)%4, tj + tjOffset)
+    } else {
+      placeTile(i, j, ti + tiOffset, tj + tjOffset);
+    }
+    
   }
   
 }
