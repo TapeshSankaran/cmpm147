@@ -14,6 +14,7 @@ const VALUE2 = 2;
 let myInstance;
 let canvasContainer;
 var centerHorz, centerVert;
+let gfx;
 
   /* exported preload, setup, draw, placeTile */
 
@@ -22,6 +23,7 @@ var centerHorz, centerVert;
 let seed = 0;
 let tilesetImage;
 let currentGrid = [];
+let currentGrid2 = [];
 let numRows, numCols;
 
 function preload() {
@@ -34,16 +36,18 @@ function reseed() {
   seed = (seed | 0) + 1109;
   randomSeed(seed);
   noiseSeed(seed);
-  select("#seedReport").html("seed " + seed);
+  select("#seedReport").html("Seed: " + seed);
   regenerateGrid();
 }
 
 function regenerateGrid() {
+  select("#asciiBox2").value(gridToString(generateGrid2(numCols, numRows)));
   select("#asciiBox").value(gridToString(generateGrid(numCols, numRows)));
   reparseGrid();
 }
 
 function reparseGrid() {
+  currentGrid2 = stringToGrid(select("#asciiBox2").value());
   currentGrid = stringToGrid(select("#asciiBox").value());
 }
 
@@ -73,6 +77,10 @@ function placeTile(i, j, ti, tj) {
   image(tilesetImage, 16 * j, 16 * i, 16, 16, 8 * ti, 8 * tj, 8, 8);
 }
 
+function placeTile2(i, j, ti, tj) {
+  gfx.image(tilesetImage, 16 * j, 16 * i, 16, 16, 8 * ti, 8 * tj, 8, 8);
+}
+
 /* exported generateGrid, drawGrid */
 /* global placeTile */
 
@@ -81,6 +89,13 @@ const lookup = [
   [11, 1], [11, 0], [11, 2], [11, 0],
   [9, 1], [9, 0], [9, 2], [9, 0],
   [11, 1], [10, 0], [10, 2], [10, 0]
+];
+
+const lookup2 = [
+  [0, 0],   [21, 7], [21, 7], [21, 7],
+  [21, 8], [21, 8], [21, 8], [21, 8],
+  [21, 9], [21, 9], [21, 9], [21, 9],
+  [21, 10], [21, 10], [21, 10], [21, 10]
 ];
 
 
@@ -102,10 +117,28 @@ function generateGrid(numCols, numRows) {
   return grid;
 }
 
+function generateGrid2(numCols, numRows) {
+  let grid = [];
+  let scale = 0.2;
+  for (let i = 0; i < numRows; i++) {
+    let row = [];
+    for (let j = 0; j < numCols; j++) {
+      if (noise(i * scale, j * scale) > 0.45) {
+        row.push('.');
+      } else {
+        row.push('_');
+      }
+    }
+    grid.push(row);
+  }
+  
+  return grid;
+}
+
 function drawGrid(grid) {
   noStroke();
   fill('#ffffff75')
-  background(128);
+  background("#161616");
 
   for(let i = 0; i < grid.length; i++) {
     for(let j = 0; j < grid[i].length; j++) {
@@ -118,15 +151,39 @@ function drawGrid(grid) {
         } 
       } else {
         placeTile(i, j, random(4)|0, 13);
-        drawContext(grid, i, j, '_', 0, 0);
+        drawContext(grid, i, j, '_', 0, 0, lookup, false);
       }
     }
 
   }
+
   for (let i = 0; i < 10; i++) {
     let z = random(40)
     
-    ellipse(500*(random()+(millis()/(z*6000)))%500-50, random(650), 40+z, 10+z)
+    ellipse(500*(random()+(millis()/(z*6000)))%500-50, random(16*numRows), 40+z, 10+z)
+  }
+}
+
+function drawGrid2(grid) {
+  gfx.noStroke();
+  gfx.fill('#00000075')
+  gfx.background(128);
+
+  for(let i = 0; i < grid.length; i++) {
+    for(let j = 0; j < grid[i].length; j++) {
+      if (gridCheck(grid, i, j, '_')) {
+        placeTile2(i, j, random(4) | 0, 3);
+      } else {
+        drawContext(grid, i, j, '_', random(4) | 0, 14, lookup2, true);
+      }
+    }
+
+  }
+  
+  for (let i = 0; i < 5; i++) {
+    let z = 30 + random(40)
+    
+    gfx.ellipse(500*(random()+(millis()/(z*6000)))%500-50, random(16*numRows), 40+z, 10+z)
   }
 }
 
@@ -148,10 +205,15 @@ function gridCode(grid, i, j, target) {
 }
 
 
-function drawContext(grid, i, j, target, ti, tj) {
+function drawContext(grid, i, j, target, ti, tj, look, second) {
   const code = gridCode(grid, i, j, target);
-  const [tiOffset, tjOffset] = lookup[code];
-  placeTile(i, j, ti + tiOffset, tj + tjOffset);
+  const [tiOffset, tjOffset] = look[code];
+  if (second) {
+    placeTile2(i, j, ti + tiOffset, tj + tjOffset);
+  } else {
+    placeTile(i, j, ti + tiOffset, tj + tjOffset);
+  }
+  
 }
 
 class MyClass {
@@ -179,11 +241,20 @@ function setup() {
   numCols = select("#asciiBox").attribute("cols") | 0;
   numRows = select("#asciiBox").attribute("rows") | 0;
   console.log(numCols);
-  createCanvas(16 * numCols, 16 * numRows).parent("canvasContainer");
+  createCanvas(16 * numCols, 16 * numRows * 2 + 50).parent("canvasContainer");
+  /*
+  
+  createCanvas(16 * numCols, 16 * numRows).parent("canvasContainer2");
+  
+  */
   select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
+  gfx = createGraphics(16 * numCols, 16 * numRows);
+  gfx.imageSmoothingEnabled = false;
+  gfx.noSmooth();
 
   select("#reseedButton").mousePressed(reseed);
   select("#asciiBox").input(reparseGrid);
+  //select("#asciiBox2").input(reparseGrid);
 /*
   $(window).resize(function() {
     resizeScreen();
@@ -197,6 +268,8 @@ function setup() {
 function draw() {
   randomSeed(seed);
   drawGrid(currentGrid);
+  drawGrid2(currentGrid2);
+  image(gfx, 0 , 16 * numRows + 50)
 }
 
 // mousePressed() function is called once after every time a mouse button is pressed
