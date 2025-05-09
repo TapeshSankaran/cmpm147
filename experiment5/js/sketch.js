@@ -59,7 +59,7 @@ function initDesign(inspiration) {
     let h = random(height/4);
     let origin_fill = inspiration.image.get(x/ImgScale, y/ImgScale)
     let fill = inspiration.image.get((x/ImgScale+w), (y/ImgScale+h));
-    if (fill == [0, 0, 0, 0]) {
+    if (x+w >= width || y+h >= height) {
       fill = origin_fill;
     }
     fill = [(fill[0]+origin_fill[0])/2, 
