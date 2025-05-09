@@ -2,7 +2,7 @@
 <html>
 <head>
 	<!-- This title is used for tabs and bookmarks -->
-	<title>Experiment X - Subject/Topic</title>
+	<title>Experiment 05 - Evolutionary Impressions</title>
 
 	<!-- Use UTF character set, a good idea with any webpage -->
 	<meta charset="UTF-8" />
@@ -32,23 +32,44 @@
 	<main id="content">
 		<section>
 
-			<h1>Experiment X - Subject/Topic</h1>
+			<h1>Experiment 05 - Evolutionary Impressions</h1>
 
-			<div class="minor-section" id="center">
-				<div class="stack">
-					<h2>World Generation</h2>
-					<p id="seedReport"></p>
+			<div class="minor-section">
+				<h2>Landscape Evolution</h2>
+				<div>
+					<select id="dropper"></select>
+					<button id="restart">restart</button>
+				</div>
+				<p>
+		      		Mutation rate (<span id="rate"></span>%):<br /><input
+    		    		id="slider"
+	    		    	type="range"
+    	    			min="1"
+	        			max="100"
+			        	value="100"
+					/>
+    			</p>
+				<div>
+					<div id="canvas-container"></div>
+				</div>
+				<p>Active score: <span id="activeScore"></span></p>
+				<p>Exploration rate: <span id="fpsCounter"></span> fps</p>
+				<div class="center">
+					<div>
+						<p id="best"></p>
+						<p>Best score: <span id="bestScore"></span></p>
+					</div>
+	    			
+					<img id="ref-image" src="https://cdn.glitch.global/e48e1025-4d3b-464e-922e-59ea5c412968/ihbv74x1z1w91.jpg?v=1746550721321" alt="Reference" />
 				</div>
 
-				
-				<span id="canvasContainer" style="margin: 10px;"></span>
-				<div class="stack">
-					<button id="reseedButton">Reseed</button>
-					<div class="fullscreen-box">					
-				</div>
-
+    			
+    			<p id="memory" data-max-items="16"></p>
+    			
+                <div class="fullscreen-box">
                     <button id="fullscreen">Fullscreen</button>
-                </div>     
+                </div>
+    
 			</div>
 
 			<div class="minor-section">

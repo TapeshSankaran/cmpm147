@@ -14,7 +14,137 @@ const VALUE2 = 2;
 let myInstance;
 let canvasContainer;
 var centerHorz, centerVert;
-let gfx;
+let numShapes = 1200;
+let ImgScale = 0.2;
+function getInspirations() {
+  return [
+    {
+      name: "Mount Fuji", 
+      assetUrl: "https://cdn.glitch.global/e48e1025-4d3b-464e-922e-59ea5c412968/ihbv74x1z1w91.jpg?v=1746550721321",
+      credit: "Mount Fuji [1920x1200], Anonymous, 2022"
+    },
+    {
+      name: "Cityscape of Sydney", 
+      assetUrl: "https://cdn.glitch.global/e48e1025-4d3b-464e-922e-59ea5c412968/iStock-646880230.jpg?v=1746551424491",
+      credit: "Cityscape Image of Sydney, Rudy Balasko, 2017"
+    },
+    {
+      name: "Crete Senesi Sunset", 
+      assetUrl: "https://cdn.glitch.global/e48e1025-4d3b-464e-922e-59ea5c412968/crete-senesi-sunset.jpg?v=1746551848783",
+      credit: "Under the Tuscan Sunset, Tuscany, Mickey Shannon, 2023"
+    },
+    {
+      name: "Lunch", 
+      assetUrl: "https://cdn.glitch.global/3abd0223-86fb-43ce-a00a-fde12615bcd5/lunch-on-a-skyscraper.jpg?v=1714798266994",
+      credit: "Under the Tuscan Sunset, Tuscany, Mickey Shannon, 2023"
+    }
+  ];
+}
+
+
+function initDesign(inspiration) {
+  resizeCanvas(inspiration.image.width*ImgScale, inspiration.image.height*ImgScale)
+  print(height + " ... " + inspiration.image.height*ImgScale);
+  let design = {
+    bg: 128,
+    fg: []
+  }
+  let avgR = 0;
+  let avgG = 0;
+  let avgB = 0;
+  for  (let i = 0; i <= numShapes; i++) {
+    let x = random(width);
+    let y = random(height);
+    let w = random(width/4);
+    let h = random(height/4);
+    let origin_fill = inspiration.image.get(x/ImgScale, y/ImgScale)
+    let fill = inspiration.image.get((x/ImgScale+w), (y/ImgScale+h));
+    if (fill == [0, 0, 0, 0]) {
+      fill = origin_fill;
+    }
+    fill = [(fill[0]+origin_fill[0])/2, 
+            (fill[1]+origin_fill[1])/2, 
+            (fill[2]+origin_fill[2])/2, 
+            (fill[3]+origin_fill[3])/2
+           ]
+    design.fg.push({
+      x: x,
+      y: y,
+      w: w,
+      h: h,
+      fill: fill//inspiration.image.get((x/ImgScale+w/2), (y/ImgScale+h/2))
+    })
+    avgR += design.fg[i].fill[0];
+    avgG += design.fg[i].fill[1];
+    avgB += design.fg[i].fill[2];
+  }
+  avgR /= numShapes;
+  avgG /= numShapes;
+  avgB /= numShapes;
+  design.bg = [avgR, avgG, avgB];
+  return design;
+}
+
+function renderDesign(design, inspiration) {
+  background(design.bg, 128);
+  noStroke();
+  for(let box of design.fg) {
+    fill(box.fill[0], box.fill[1], box.fill[2], 128);
+    //push();
+    //translate(-box.w/2, -box.h/2)
+    let det = random();
+    if (det < 0.33)
+      rect(box.x, box.y, box.w, box.h);
+    else if (det < 0.66)
+      ellipse(box.x, box.y, box.w, box.h);
+    else
+      triangle(box.x, box.y-box.h/2, box.x-box.w/2, box.y+box.h, box.x+box.w/2, box.y+box.h);
+    //pop();
+  }
+}
+
+function mutateDesign(design, inspiration, rate) {
+  for(let box of design.fg) {
+    let x = mut(box.x, 0, width, rate);
+    let y = mut(box.y, 0, height, rate);
+    let w = mut(box.w, 0, width/4, rate);
+    let h = mut(box.h, 0, height/30, rate);
+    let origin_fill = inspiration.image.get(x/ImgScale, y/ImgScale)
+    let end_fill = inspiration.image.get((x/ImgScale+w), (y/ImgScale+h));
+    if (x+w >= width || y+h >= height) {
+      end_fill = origin_fill;
+    }
+    
+    let fill = [(end_fill[0]+origin_fill[0])/2, 
+            (end_fill[1]+origin_fill[1])/2, 
+            (end_fill[2]+origin_fill[2])/2, 
+            (end_fill[3]+origin_fill[3])/2
+           ]
+    box.x = x;
+    box.y = y;
+    box.w = w;
+    box.h = h;
+    box.fill = [mut(fill[0], origin_fill[0], end_fill[0], rate), 
+                mut(fill[1], origin_fill[1], end_fill[1], rate), 
+                mut(fill[2], origin_fill[2], end_fill[2], rate)
+               ];
+  }
+  let avgR = design.bg[0];
+  let avgG = design.bg[1];
+  let avgB = design.bg[2];
+  design.bg = [mut(avgR, avgR-20, avgR+20, rate), 
+               mut(avgG, avgG-20, avgG+20, rate), 
+               mut(avgB, avgB-20, avgB+20, rate)
+              ];
+}
+
+
+function mut(num, min, max, rate) {
+  return constrain(randomGaussian(num, (rate * (Math.abs(max - min))) / 10), min, max);
+}
+
+//------------------------------------------------------------------------------------------------------
+//                                           || Sketch Main ||
 
   /* exported preload, setup, draw, placeTile */
 
@@ -26,13 +156,15 @@ let currentScore;
 let currentInspiration;
 let currentCanvas;
 let currentInspirationPixels;
+let allInspirations;
 
 function preload() {
-  let allInspirations = getInspirations();
+  allInspirations = getInspirations();
 
   for (let i = 0; i < allInspirations.length; i++) {
     let insp = allInspirations[i];
     insp.image = loadImage(insp.assetUrl);
+    $("ref-img").src = insp.assetUrl;
     let option = document.createElement("option");
     option.value = i;
     option.innerHTML = insp.name;
@@ -60,6 +192,7 @@ class MyClass {
 function inspirationChanged(nextInspiration) {
   currentInspiration = nextInspiration;
   currentDesign = undefined;
+  document.getElementById("ref-image").src = nextInspiration.assetUrl;
   memory.innerHTML = "";
   setup();
 }
@@ -74,7 +207,7 @@ function resizeScreen() {
 
 function setup() {
   currentCanvas = createCanvas(width, height);
-  currentCanvas.parent(document.getElementById("active"));
+  currentCanvas.parent("canvas-container");
   currentScore = Number.NEGATIVE_INFINITY;
   currentDesign = initDesign(currentInspiration);
   bestDesign = currentDesign;

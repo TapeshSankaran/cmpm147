@@ -81,3 +81,14 @@ body.is-fullscreen #canvas-container {
   margin: 0; /* Remove any default margins */
   z-index: 1000; /* Ensure it's above other content */
 }
+
+select {
+  background-color: #1f1f1f;
+  color: rgb(169, 169, 169);
+  border-color: #b4a17f;
+}
+
+input {
+  background-color: rgb(169, 169, 169);
+  color:#1f1f1f;
+}

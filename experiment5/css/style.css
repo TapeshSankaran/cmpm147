@@ -16,7 +16,7 @@ body {
 
 #canvas-container {
     width: 100%;
-    height: 600px;
+    height: 100%;
 }
 
 .stack {
@@ -28,9 +28,14 @@ body {
     gap: 0.5rem;
 }
 
-#center {
+.center {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: flex-start;
     height: auto;
     gap: 1rem;
+}
+
+#ref-image {
+    width: 25%;
+    height: 25%;
 }
