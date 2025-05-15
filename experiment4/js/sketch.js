@@ -20,215 +20,93 @@ let gfx;
 
 /* global generateGrid drawGrid */
 
-let seed = 0;
-let tilesetImage;
-let currentGrid = [];
-let currentGrid2 = [];
-let numRows, numCols;
+"use strict";
 
-function preload() {
-  tilesetImage = loadImage(
-    "https://cdn.glitch.com/25101045-29e2-407a-894c-e0243cd8c7c6%2FtilesetP8.png?v=1611654020438"
+/* global XXH */
+/* exported --
+    p3_preload
+    p3_setup
+    p3_worldKeyChanged
+    p3_tileWidth
+    p3_tileHeight
+    p3_tileClicked
+    p3_drawBefore
+    p3_drawTile
+    p3_drawSelectedTile
+    p3_drawAfter
+*/
+let tileSet;
+let lavaSet;
+let treeSet;
+let treeSet2;
+let bonSet;
+let furnaceSet;
+let fireSet;
+let t = 0;
+
+function p3_preload() {
+  tileSet = loadImage(
+    'https://cdn.glitch.global/87432fec-f895-41b0-a03b-501f4a6b22bd/25101045-29e2-407a-894c-e0243cd8c7c6_tileset.png?v=1745810192038'
   );
-}
-
-function reseed() {
-  seed = (seed | 0) + 1109;
-  randomSeed(seed);
-  noiseSeed(seed);
-  select("#seedReport").html("Seed: " + seed);
-  regenerateGrid();
-}
-
-function regenerateGrid() {
-  select("#asciiBox2").value(gridToString(generateGrid2(numCols, numRows)));
-  select("#asciiBox").value(gridToString(generateGrid(numCols, numRows)));
-  reparseGrid();
-}
-
-function reparseGrid() {
-  currentGrid2 = stringToGrid(select("#asciiBox2").value());
-  currentGrid = stringToGrid(select("#asciiBox").value());
-}
-
-function gridToString(grid) {
-  let rows = [];
-  for (let i = 0; i < grid.length; i++) {
-    rows.push(grid[i].join(""));
-  }
-  return rows.join("\n");
-}
-
-function stringToGrid(str) {
-  let grid = [];
-  let lines = str.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    let row = [];
-    let chars = lines[i].split("");
-    for (let j = 0; j < chars.length; j++) {
-      row.push(chars[j]);
-    }
-    grid.push(row);
-  }
-  return grid;
-}
-
-function placeTile(i, j, ti, tj) {
-  image(tilesetImage, 16 * j, 16 * i, 16, 16, 8 * ti, 8 * tj, 8, 8);
-}
-
-function placeTile2(i, j, ti, tj) {
-  gfx.image(tilesetImage, 16 * j, 16 * i, 16, 16, 8 * ti, 8 * tj, 8, 8);
-}
-
-/* exported generateGrid, drawGrid */
-/* global placeTile */
-
-const lookup = [
-  [0, 13], [10, 0], [10, 2], [10, 0, 10, 2],
-  [11, 1], [11, 0], [11, 2], [11, 0],
-  [9, 1], [9, 0], [9, 2], [9, 0],
-  [11, 1, 9, 1], [10, 0, 9, 1, 11, 1], [11, 1, 9, 1, 10, 2], [10, 0, 10, 2]
-];
-
-const lookup2 = [
-  [0, 0],   [21, 7], [21, 7], [21, 7],
-  [21, 8], [21, 8], [21, 8], [21, 8],
-  [21, 9], [21, 9], [21, 9], [21, 9],
-  [21, 10], [21, 10], [21, 10], [21, 10]
-];
-
-
-function generateGrid(numCols, numRows) {
-  let grid = [];
-  let scale = 0.1;
-  for (let i = 0; i < numRows; i++) {
-    let row = [];
-    for (let j = 0; j < numCols; j++) {
-      if (noise(i * scale, j * scale) > 0.5) {
-        row.push('.');
-      } else {
-        row.push('_');
-      }
-    }
-    grid.push(row);
-  }
+  lavaSet = loadImage(
+    'https://cdn.glitch.global/2516bd14-e8a7-49bd-a8bd-641c956232e9/25101045-29e2-407a-894c-e0243cd8c7c6_tileset2.png?v=1745984368784'
+  );
+  treeSet = loadImage('https://cdn.glitch.global/87432fec-f895-41b0-a03b-501f4a6b22bd/Size_03.png?v=1745888706956')
+  treeSet2 = loadImage('https://cdn.glitch.global/87432fec-f895-41b0-a03b-501f4a6b22bd/Size_04.png?v=1745889288681')
+  bonSet = loadImage('https://cdn.glitch.global/87432fec-f895-41b0-a03b-501f4a6b22bd/Bonfire_02-Sheet.png?v=1745909631629');
+  furnaceSet = loadImage('https://cdn.glitch.global/2516bd14-e8a7-49bd-a8bd-641c956232e9/Iron_03-Sheet.png?v=1745989012258');
+  fireSet = loadImage('https://cdn.glitch.global/87432fec-f895-41b0-a03b-501f4a6b22bd/Fire_01-Sheet.png?v=1745910683294');
   
-  return grid;
+  //image(tileSet, screenX, screenY, tileWidth, tileHeight, 8 * 0, 8 * 0, 8, 8)
 }
 
-function generateGrid2(numCols, numRows) {
-  let grid = [];
-  let scale = 0.2;
-  for (let i = 0; i < numRows; i++) {
-    let row = [];
-    for (let j = 0; j < numCols; j++) {
-      if (noise(i * scale, j * scale) > 0.45) {
-        row.push('.');
-      } else {
-        row.push('_');
-      }
-    }
-    grid.push(row);
-  }
-  
-  return grid;
+function p3_setup() {
 }
 
-function drawGrid(grid) {
+let worldSeed;
+
+function p3_worldKeyChanged(key) {
+  worldSeed = XXH.h32(key, 0);
+  noiseSeed(worldSeed);
+  randomSeed(worldSeed);
+}
+
+function p3_tileWidth() {
+  return 16;
+}
+function p3_tileHeight() {
+  return 8;
+}
+
+let [tw, th] = [p3_tileWidth(), p3_tileHeight()];
+
+let clicks = {};
+let tiles = {};
+
+function p3_tileClicked(i, j) {
+  let key = [i, j];
+  clicks[key] = 1 + (clicks[key] | 0);
+}
+
+function p3_tileRandom(i, j, k) {
+  return XXH.h32("tile:" + i + "," + j, worldSeed) % k; // 4 tile types
+}
+
+function p3_drawSelectedTile(i, j) {
+  noFill();
+  stroke(0, 255, 0, 128);
+  translate(0, tiles[[i, j]]*2)
+  beginShape();
+  vertex(-tw, 0);
+  vertex(0, th);
+  vertex(tw, 0);
+  vertex(0, -th);
+  endShape(CLOSE);
+
   noStroke();
-  fill('#ffffff75')
-  background("#161616");
-
-  for(let i = 0; i < grid.length; i++) {
-    for(let j = 0; j < grid[i].length; j++) {
-      if (gridCheck(grid, i, j, '_')) {
-        placeTile(i, j, random(4)|0, 0);
-        if (random() < 0.01) {
-          placeTile(i, j, 26, random(4)|0);
-        } else if (random() < 0.05) {
-          placeTile(i, j, 14, 6);
-        } 
-      } else {
-        placeTile(i, j, random(4)|0, 13);
-        drawContext(grid, i, j, '_', 0, 0, lookup, false);
-      }
-    }
-
-  }
-
-  for (let i = 0; i < 10; i++) {
-    let z = random(40)
-    
-    ellipse(500*(random()+(millis()/(z*6000)))%500-50, random(16*numRows), 40+z, 10+z)
-  }
+  fill(0);
+  text("tile " + [i, j], 0, 0);
 }
-
-function drawGrid2(grid) {
-  gfx.noStroke();
-  gfx.fill('#00000075')
-  gfx.background(128);
-
-  for(let i = 0; i < grid.length; i++) {
-    for(let j = 0; j < grid[i].length; j++) {
-      if (gridCheck(grid, i, j, '_')) {
-        placeTile2(i, j, random(4) | 0, 3);
-      } else {
-        drawContext(grid, i, j, '_', 0, 14, lookup2, true);
-      }
-    }
-
-  }
-  
-  for (let i = 0; i < 5; i++) {
-    let z = 30 + random(40)
-    
-    gfx.ellipse(500*(random()+(millis()/(z*6000)))%500-50, random(16*numRows), 40+z, 10+z)
-  }
-}
-
-function gridCheck(grid, i, j, target) {
-  if (i < 0 || i >= grid.length || j < 0 || j >= grid[0].length) {
-    return false;
-  }
-  return grid[i][j] === target;
-}
-
-
-function gridCode(grid, i, j, target) {
-  const northBit = gridCheck(grid, i - 1, j, target) ? 1 : 0;
-  const southBit = gridCheck(grid, i + 1, j, target) ? 1 : 0;
-  const eastBit  = gridCheck(grid, i, j + 1, target) ? 1 : 0;
-  const westBit  = gridCheck(grid, i, j - 1, target) ? 1 : 0;
-
-  return (northBit << 0) + (southBit << 1) + (eastBit << 2) + (westBit << 3);
-}
-
-
-function drawContext(grid, i, j, target, ti, tj, look, second) {
-  const code = gridCode(grid, i, j, target);
-  //const [tiOffset, tjOffset] = look[code];
-  if (second) {
-    if (code == 0) {
-      placeTile2(i, j, ti + ((millis()/5000 + random(4))|0)%4, tj + look[code][1])
-    } else {
-      for (let k=0; k<look[code].length; k+=2) {
-        placeTile2(i, j, ti + look[code][k], tj + look[code][k+1]);
-      }
-    }
-  } else {
-    if (code == 0) {
-      placeTile(i, j, ti + ((millis()/2000 + random(4))|0)%4, tj + look[code][1])
-    } else {
-      for (let k=0; k<look[code].length; k+=2) {
-        placeTile(i, j, ti + look[code][k], tj + look[code][k+1]);
-      }
-    }
-    
-  }
-  
-}
-
 class MyClass {
     constructor(param1, param2) {
         this.property1 = param1;
@@ -248,41 +126,369 @@ function resizeScreen() {
   //redrawCanvas(); // Redraw everything based on new size
 }
 
-// setup() function is called once when the program starts
-function setup() {
-  //canvasContainer = $("#canvas-container")
-  numCols = select("#asciiBox").attribute("cols") | 0;
-  numRows = select("#asciiBox").attribute("rows") | 0;
-  console.log(numCols);
-  createCanvas(16 * numCols, 16 * numRows * 2 + 50).parent("canvasContainer");
-  /*
-  
-  createCanvas(16 * numCols, 16 * numRows).parent("canvasContainer2");
-  
-  */
-  select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
-  gfx = createGraphics(16 * numCols, 16 * numRows);
-  gfx.imageSmoothingEnabled = false;
-  gfx.noSmooth();
+function p3_drawBefore() {}
 
-  select("#reseedButton").mousePressed(reseed);
-  select("#asciiBox").input(reparseGrid);
-  //select("#asciiBox2").input(reparseGrid);
-/*
-  $(window).resize(function() {
-    resizeScreen();
-  });
-  resizeScreen();
-*/
-  reseed();
+function p3_drawTile(i, j, o, p, tileType) {
+  currentWorld.functions.drawTile(i, j, o, p, tileType);
 }
 
-// draw() function is called repeatedly, it's the main animation loop
-function draw() {
-  randomSeed(seed);
-  drawGrid(currentGrid);
-  drawGrid2(currentGrid2);
-  image(gfx, 0 , 16 * numRows + 50)
+function p3_drawAfter(offsetX, offsetY) {
+  currentWorld.functions.drawAfter(offsetX, offsetY);
+}
+
+function p3_worldChanged(world) {
+  currentWorld = world;
+}
+
+/////////////////////////////
+// All World Functions
+/////////////////////////////
+
+function p3_drawNormalTile(i, j, o, p, tileType) {
+  randomSeed(i*j)
+  imageMode(CENTER);
+  angleMode(DEGREES);
+  noStroke();
+  let y = 0;
+  let z = 0;
+  let scaleD = 0.02;
+  let nFunc = noise(0.2*i, 0.2*j);
+  let riverCenter = noise(j * scaleD) * 100;  // horizontal river path
+  if (abs(i - riverCenter)%100 < 4) {
+    z = 13;
+    tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+    y = 4;
+  } else if (abs(i - riverCenter) > 90 && abs(i - riverCenter) < 100) {
+    z = 13;
+    tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+    y = 4;
+  } else if (nFunc > 0.6) {
+    stroke(0, 0, 0);
+    z = 23;
+    tileType += 8;
+    y = -4;
+    push();
+    scale(1, 1.5);
+    shearY(PI*6)
+  
+    image(tileSet, screenX-8, screenY+3, p3_tileWidth(), p3_tileHeight(), 8*(11+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    push();
+    scale(1, 1.5);
+    shearY(-PI*6)
+    image(tileSet, screenX+8, screenY+3, p3_tileWidth(), p3_tileHeight(), 8*(11+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    noStroke();
+      
+  } else if (nFunc<0.4) {
+    if (nFunc<0.25) {
+      z = 13;
+      tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+      y = 4;
+    } else {
+      z = 3;
+      y = 2;
+    }
+  }
+  if (z!=13) {
+    push();
+    scale(1, 1.5);
+    shearY(PI*6)
+    let yL = z == 3 ? 3 : 0;
+    image(tileSet, screenX-8, screenY+9+yL, p3_tileWidth(), p3_tileHeight(), 8*(1+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    push();
+    scale(1, 1.5);
+    shearY(-PI*6)
+    image(tileSet, screenX+8, screenY+9+yL, p3_tileWidth(), p3_tileHeight(), 8*(1+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+  }
+  push();
+
+  rotate(30)
+  scale(1.14, 1.94)
+  shearX(-PI*15)
+  
+  let tile = image(tileSet, screenX+2*y, screenY+y, p3_tileWidth(), p3_tileHeight(), tileType, 8*z, 8, 8);
+  
+  pop();
+  let l = noise(0.5*i, 0.5*j);
+  let ls = random(50)
+  if (z == 0 && l<0.3) {
+    fill(0, 0, 0, 42);
+    ellipse(2, -7, 50, 20);
+    image(l < 0.17 ? treeSet : treeSet2, screenX, screenY-50+0.5*ls, 100-ls, 100-ls, 78*(((l*21)|0)%2), 78*(((nFunc*21)|0)%2), 78, 78, COVER, CENTER)
+  } else if (z != 13 && l > 0.84) {
+    image(bonSet, screenX, screenY-5+y, 32, 32, 32*(((millis()/2000 + random(3))|0)%3), 0, 32, 32)
+  }
+
+  
+  let n = clicks[[i, j]] | 0;
+  if (n % 2 == 1 && l > 0.84) {
+    stroke(1, 1, 1, 1)
+    fill(0, 0, 0, 32);
+    ellipse(0, 0, 10, 5);
+    //translate(0, -10);
+    fill(255, 255, 100, 128);
+    ellipse(0, -10, 10, 10);
+    image(fireSet, screenX, screenY-10, 32, 32, 32*(((millis()/200)|0)%3), 0, 32, 32)
+  }
+  tiles[[i, j]] = y;
+}
+
+function p3_normalDrawAfter(offsetX, offsetY) {
+  noStroke();
+  let scale = 0.01;
+  let cloudAlpha = 200;
+  for (let y = 0; y < height+20; y += 3) {
+    for (let x = 0; x < width+20; x += 3) {
+      let n = noise((x+offsetX) * scale, (y-offsetY) * scale, 0.25*t);
+      if (n > 0.6) {
+        fill(255, 255, 255, cloudAlpha * (n - 0.5) * 2);
+        rect(x, y, 3, 3);
+      }
+    }
+  }
+
+  t += 0.01; 
+}
+
+/////////////////////////////
+//Infernal World
+/////////////////////////////
+
+function p3_drawLavaTile(i, j, o, p, tileType) {
+  randomSeed(i*j)
+  imageMode(CENTER);
+  angleMode(DEGREES);
+  noStroke();
+  let y = 0;
+  let z = 23;
+  let scaleD = 0.02;
+  let nFunc = noise(0.2*i, 0.2*j);
+  let riverCenter = noise(j * scaleD) * 100;  // horizontal river path
+  if (abs(i - riverCenter)%100 < 4) {
+    z = 13;
+    tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+    y = 4;
+  } else if (abs(i - riverCenter) > 90 && abs(i - riverCenter) < 100) {
+    z = 13;
+    tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+    y = 4;
+  } else if (nFunc > 0.6) {
+    stroke(0, 0, 0);
+    if (nFunc > 0.7) z = 0;
+    else z = 3;
+    
+    y = -4;
+    push();
+    scale(1, 1.5);
+    shearY(PI*6)
+  
+    image(lavaSet, screenX-8, screenY+3, p3_tileWidth(), p3_tileHeight(), 8*(21+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    push();
+    scale(1, 1.5);
+    shearY(-PI*6)
+    image(lavaSet, screenX+8, screenY+3, p3_tileWidth(), p3_tileHeight(), 8*(21+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    noStroke();
+      
+  } else if (nFunc<0.4) {
+    if (nFunc<0.25) {
+      z = 13;
+      tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+      y = 4;
+    } else {
+      z = 23;
+      tileType += 21*8;
+      y = 2;
+    }
+  }
+  if (z!=13) {
+    push();
+    scale(1, 1.5);
+    shearY(PI*6)
+    let yL = tileType >= 6*8 ? 3 : 0;
+    image(lavaSet, screenX-8, screenY+9+yL, p3_tileWidth(), p3_tileHeight(), 8*(11+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    push();
+    scale(1, 1.5);
+    shearY(-PI*6)
+    image(lavaSet, screenX+8, screenY+9+yL, p3_tileWidth(), p3_tileHeight(), 8*(11+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+  }
+  push();
+
+  rotate(30)
+  scale(1.14, 1.94)
+  shearX(-PI*15)
+  
+  let tile = image(lavaSet, screenX+2*y, screenY+y, p3_tileWidth(), p3_tileHeight(), tileType, 8*z, 8, 8);
+  
+  pop();
+  let l = noise(0.5*i, 0.5*j);
+  let ls = random(25)
+  if (z == 0 && l<0.25) {
+    fill(0, 0, 0, 42);
+    ellipse(2, -7, 50, 20);
+    image(l < 0.17 ? treeSet : treeSet2, screenX, screenY-60+0.5*ls, 100-ls, 100-ls, 78*(((l*21)|0)%2), 78*(((nFunc*21)|0)%2), 78, 78, COVER, CENTER)
+  } else if (z != 13 && l > 0.84) {
+    image(furnaceSet, screenX, screenY-15+y, 32, 32, 64*(((millis()/2000 + random(3))|0)%3), 0, 64, 64)
+  }
+
+  
+  let n = clicks[[i, j]] | 0;
+  if (n % 2 == 1 && l > 0.84) {
+    stroke(1, 1, 1, 1)
+    fill(0, 0, 0, 32);
+    ellipse(0, 0, 10, 5);
+    //translate(0, -10);
+    fill(255, 255, 100, 128);
+    ellipse(0, -10, 10, 10);
+    image(furnaceSet, screenX, screenY-15+y, 32, 32, 64*(((millis()/400 + random(3))|0)%3), 0, 64, 64)
+    image(fireSet, screenX-8, screenY-30, 8, 16, 32*(((millis()/200)|0)%3), 0, 32, 32)
+    image(fireSet, screenX, screenY-33, 12, 20, 32*(((millis()/200)|0)%3), 0, 32, 32)
+    image(fireSet, screenX+8, screenY-30, 8, 16, 32*(((millis()/200)|0)%3), 0, 32, 32)
+  }
+  tiles[[i, j]] = y;
+}
+
+function p3_lavaDrawAfter(offsetX, offsetY) {
+  noStroke();
+  let scale = 0.01;
+  let cloudAlpha = 255;
+  for (let y = 0; y < height+20; y += 3) {
+    for (let x = 0; x < width+20; x += 3) {
+      let n = noise((x+offsetX) * scale, (y-offsetY) * scale, 0.25*t);
+      if (n > 0.6) {
+        fill(255, 220, 200, cloudAlpha * (n - 0.5) * 2);
+        rect(x, y, 3, 3);
+      }
+    }
+  }
+
+  t += 0.01; 
+}
+
+/////////////////////////////
+//Snowy World
+/////////////////////////////
+
+function p3_drawSnowyTile(i, j, o, p, tileType) {
+  randomSeed(i*j)
+  imageMode(CENTER);
+  angleMode(DEGREES);
+  noStroke();
+  let y = 0;
+  let z = 0;
+  let scaleD = 0.02;
+  let nFunc = noise(0.2*i, 0.2*j);
+  let riverCenter = noise(j * scaleD) * 100;  // horizontal river path
+  if (abs(i - riverCenter)%100 < 4) {
+    z = 13;
+    tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+    y = 4;
+  } else if (abs(i - riverCenter) > 90 && abs(i - riverCenter) < 100) {
+    z = 13;
+    tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+    y = 4;
+  } else if (nFunc > 0.6) {
+    stroke(0, 0, 0);
+    if (XXH.h32("tile:" + i + "," + j, worldSeed)) {
+      z = 23;
+      tileType += 8;
+    } else {
+      z = 12;
+    }
+    
+    y = -4;
+    push();
+    scale(1, 1.5);
+    shearY(PI*6)
+  
+    image(tileSet, screenX-8, screenY+3, p3_tileWidth(), p3_tileHeight(), 8*(11+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    push();
+    scale(1, 1.5);
+    shearY(-PI*6)
+    image(tileSet, screenX+8, screenY+3, p3_tileWidth(), p3_tileHeight(), 8*(11+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    noStroke();
+      
+  } else if (nFunc<0.4) {
+    if (nFunc<0.25) {
+      z = 13;
+      tileType = 8*(((noise(millis()/5000 + 1  + random(10))))%3);
+      y = 4;
+    } else {
+      z = 3;
+      y = 2;
+    }
+  } if (XXH.h32("tile:" + i + "," + j, worldSeed) % 2) {
+    z = 12;
+  }
+  if (y<1) {
+    push();
+    scale(1, 1.5);
+    shearY(PI*6)
+    let yL = z == 3 ? 3 : 0;
+    image(tileSet, screenX-8, screenY+9+yL, p3_tileWidth(), p3_tileHeight(), 8*(1+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+    push();
+    scale(1, 1.5);
+    shearY(-PI*6)
+    image(tileSet, screenX+8, screenY+9+yL, p3_tileWidth(), p3_tileHeight(), 8*(1+random(3)|0), 8*(22+random(3)|0), 8, 8)
+    pop();
+  }
+  push();
+
+  rotate(30)
+  scale(1.14, 1.94)
+  shearX(-PI*15)
+  
+  let tile = image(tileSet, screenX+2*y, screenY+y, p3_tileWidth(), p3_tileHeight(), tileType, 8*z, 8, 8);
+  
+  pop();
+  let l = noise(0.5*i, 0.5*j);
+  let ls = random(50)
+  if (z == 0 && l<0.3) {
+    fill(0, 0, 0, 42);
+    ellipse(2, -7, 50, 20);
+    image(l < 0.17 ? treeSet : treeSet2, screenX, screenY-50+0.5*ls, 100-ls, 100-ls, 78*(((l*21)|0)%2), 78*(((nFunc*21)|0)%2), 78, 78, COVER, CENTER)
+  } else if (z != 13 && l > 0.84) {
+    image(bonSet, screenX, screenY-5+y, 32, 32, 32*(((millis()/2000 + random(3))|0)%3), 0, 32, 32)
+  }
+
+  
+  let n = clicks[[i, j]] | 0;
+  if (n % 2 == 1 && l > 0.84) {
+    stroke(1, 1, 1, 1)
+    fill(0, 0, 0, 32);
+    ellipse(0, 0, 10, 5);
+    //translate(0, -10);
+    fill(255, 255, 100, 128);
+    ellipse(0, -10, 10, 10);
+    image(fireSet, screenX, screenY-10, 32, 32, 32*(((millis()/200)|0)%3), 0, 32, 32)
+  }
+  tiles[[i, j]] = y;
+}
+
+function p3_snowyDrawAfter(offsetX, offsetY) {
+  noStroke();
+  let scale = 0.004;
+  let cloudAlpha = 400;
+  for (let y = 0; y < height+20; y += 3) {
+    for (let x = 0; x < width+20; x += 3) {
+      let n = noise((x+offsetX) * scale, (y-offsetY) * scale, 0.25*t);
+      if (n > 0.6) {
+        fill(200, 220, 255, cloudAlpha * (n - 0.5) * 2);
+        rect(x, y, 3, 3);
+      }
+    }
+  }
+
+  t += 0.01; 
 }
 
 // mousePressed() function is called once after every time a mouse button is pressed
